@@ -1,5 +1,7 @@
-import {Button, Checkbox} from "antd"
-import {DeleteFilled, EditFilled} from "@ant-design/icons"
+import {IconButton,Button} from "@mui/material"
+import { colors } from "../../colour_config"
+import DeleteIcon from '@mui/icons-material/Delete';
+import ModeEditIcon from '@mui/icons-material/ModeEdit';
 
 export default function TaskComponent(){
     const taskSelection = (event)=>{
@@ -16,8 +18,8 @@ export default function TaskComponent(){
                 </div>
             </div>
             <div style={{display:"flex",alignItems:"center",columnGap:"5px"}}>
-                <Button style={{background:"#CCCEDF"}}><DeleteFilled /></Button>
-                <Button style={{background:"#CCCEDF"}}><EditFilled /></Button>
+                <IconButton ><DeleteIcon fontSize="small"/></IconButton>
+                <IconButton ><ModeEditIcon fontSize="small"/></IconButton>
             </div>
         </div>
     )
