@@ -1,0 +1,24 @@
+import {Button, Checkbox} from "antd"
+import {DeleteFilled, EditFilled} from "@ant-design/icons"
+
+export default function TaskComponent(){
+    const taskSelection = (event)=>{
+    }
+    
+    return(
+        <div style={{border:"none",borderRadius:"8px",background:"white",width:'500px',padding:"20px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div style={{display:"flex",alignItems:"center", columnGap:"20px"}}>
+                <input type="checkbox" style={{width:"20px",height:"20px"}} onChange={taskSelection}/>
+                <div style={{display:"flex",flexDirection:"column",rowGap:"3px"}}>
+                    <p style={{fontWeight:"600",fontSize:"20px"}}>Task title</p>
+                    <p style={{}}>Task description</p>
+                    <p style={{fontSize:"12px"}}>Created At: 5:23 AM, 01/06/2022</p>
+                </div>
+            </div>
+            <div style={{display:"flex",alignItems:"center",columnGap:"5px"}}>
+                <Button style={{background:"#CCCEDF"}}><DeleteFilled /></Button>
+                <Button style={{background:"#CCCEDF"}}><EditFilled /></Button>
+            </div>
+        </div>
+    )
+}
