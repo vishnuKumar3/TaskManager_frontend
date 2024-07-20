@@ -7,6 +7,7 @@ import {makeStyles} from "@mui/styles"
 import {Button} from "@mui/material"
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import axios from "axios"
+import {message} from "antd"
 
 
 const useStyles = makeStyles((theme)=>({
@@ -35,6 +36,7 @@ export default function Signup(){
     const formRef = useRef("") 
     const [fileName, setFilename] = useState("");
     const [fileObj, setFileObj] = useState({})
+    const [messageApi, contextHolder] = message.useMessage()
 
     const handleChange = (event)=>{
         console.log("file info",event.target.files)
@@ -50,12 +52,19 @@ export default function Signup(){
         })
         formData.append("avatar",fileObj);
         formData.append("signInType","normal");
-        let ret = await axios.post("http://localhost:8080/user/signup",formData);
-        console.log("response from signup api",ret.data);
+        let res = await axios.post("http://localhost:8080/user/signup",formData);
+        if(res?.data?.status?.toLowerCase() === "success"){
+            messageApi.open({content:res?.data?.message,type:"success",duration:5})
+        }
+        else{
+            messageApi.open({content:res?.data?.message,type:"error",duration:5})
+        }        
+        console.log("response from signup api",res.data);
     }
 
     return(
         <div style={{display:"flex",justifyContent:"center",alignItems:"center",width:"100%",background:`linear-gradient(340deg,${colors.blueVariant} 50%,white 1%`,height:"max-content",padding:"50px 0px"}}>
+            {contextHolder}
             <Formik
             initialValues={{ firstName:"",lastName:"",email: '', password: '',reEnteredPassword:"",avatar:"" }}
             validationSchema={LoginSchema}
@@ -63,6 +72,7 @@ export default function Signup(){
                 console.log(values,fileObj)
                 handleFormData(values)
                 resetForm()
+                setFilename("")
             }}
             >
             {(formik) => (

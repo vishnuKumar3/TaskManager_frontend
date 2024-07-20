@@ -1,10 +1,12 @@
-import React,{useRef} from 'react';
-import {Link} from "react-router-dom"
+import React,{useRef, useMemo, useState} from 'react';
+import {Link, useNavigate} from "react-router-dom"
 import { Formik } from 'formik';
 import * as yup from "yup"
 import {colors} from "../colour_config"
 import {makeStyles} from "@mui/styles"
 import {Button} from "@mui/material"
+import axios from "axios"
+import {message} from "antd"
 
 const useStyles = makeStyles((theme)=>({
     input:{
@@ -28,13 +30,36 @@ const LoginSchema = yup.object({
 export default function Login(){
     const styles = useStyles()
     const formRef = useRef("")
+    const navigate = useNavigate();
+    const [messageApi, contextHolder] = message.useMessage()
+
+    const handleSignin = async (formValues)=>{
+        formValues["signInType"] = "normal"
+        let res = await axios.post("http://localhost:8080/user/login",formValues,{
+            headers:{
+                "Content-Type":"application/json"
+            }
+        });
+        if(res?.data?.status?.toLowerCase() === "success"){
+            messageApi.open({content:res?.data?.message,type:"success",duration:5})
+            navigate("/tasks")
+        }
+        else{
+            messageApi.open({content:res?.data?.message,type:"error",duration:5})
+        }
+        console.log("response from signup api",res.data);
+    }
+    
     return(
         <div style={{display:"flex",justifyContent:"center",alignItems:"center",width:"100%",height:"100vh",background:`linear-gradient(340deg,${colors.blueVariant} 50%,white 1%`}}>
+            {contextHolder}
             <Formik
             initialValues={{ email: '', password: '' }}
             validationSchema={LoginSchema}
-            onSubmit={(values, { setSubmitting }) => {
+            onSubmit={(values, { setSubmitting,resetForm }) => {
                 console.log(values)
+                handleSignin(values)
+                resetForm()
             }}
             >
             {(formik) => (

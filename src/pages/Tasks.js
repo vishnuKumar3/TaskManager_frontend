@@ -1,4 +1,4 @@
-import TaskComponent from "../components/DNDComponent/TaskComponent"
+import TaskComponent from "../components/TaskComponent"
 
 export default function Tasks(){
     return(
