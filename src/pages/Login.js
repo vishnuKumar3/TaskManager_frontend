@@ -7,6 +7,8 @@ import {makeStyles} from "@mui/styles"
 import {Button} from "@mui/material"
 import axios from "axios"
 import {message} from "antd"
+import { useGoogleLogin } from '@react-oauth/google';
+
 
 const useStyles = makeStyles((theme)=>({
     input:{
@@ -33,9 +35,24 @@ export default function Login(){
     const navigate = useNavigate();
     const [messageApi, contextHolder] = message.useMessage()
 
-    const handleSignin = async (formValues)=>{
-        formValues["signInType"] = "normal"
-        let res = await axios.post("http://localhost:8080/user/login",formValues,{
+    const googleLogin = useGoogleLogin({
+        onSuccess: async(codeResponse)=>{
+            console.log("google response...",codeResponse);
+            let userData = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${codeResponse.access_token}`);
+            console.log(userData)
+            if(userData?.data?.email){
+                let userInfo = {
+                    email:userData?.data?.email
+                }
+                handleSignin(userInfo, "google")
+            }
+        },
+        onError: (error) => {console.log('Login Failed:', error);messageApi.open({type:"error",content:error,duration:5})}
+    });    
+
+    const handleSignin = async (formValues, signInType)=>{
+        formValues["signInType"] = signInType
+        let res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/user/login`,formValues,{
             headers:{
                 "Content-Type":"application/json"
             }
@@ -58,7 +75,7 @@ export default function Login(){
             validationSchema={LoginSchema}
             onSubmit={(values, { setSubmitting,resetForm }) => {
                 console.log(values)
-                handleSignin(values)
+                handleSignin(values,"normal")
                 resetForm()
             }}
             >
@@ -86,10 +103,20 @@ export default function Login(){
                 />
                 <p className={`${styles.errorMessage}`}>{formik.touched.password && formik.errors.password?formik.errors.password:""}</p>
                 <div style={{display:"flex",justifyContent:"center"}}>
-                    <Button variant={"contained"} type='submit' style={{padding:"5px 20px",background:`${colors.blueVariant}`,color:"white"}} disabled={formik.isSubmitting}>
+                    <Button variant={"contained"} type='submit' style={{textTransform:"capitalize",padding:"5px 20px",background:`${colors.blueVariant}`,color:"white"}} disabled={formik.isSubmitting}>
                         Submit
                     </Button>
                 </div>
+                <div style={{display:"flex",alignItems:'center',columnGap:"5px"}}>
+                    <hr style={{flexGrow:1}}/>
+                    or
+                    <hr style={{flexGrow:1}}/>
+                </div>
+                <div style={{display:"flex",justifyContent:"center"}}>
+                    <Button onClick={googleLogin} variant={"contained"} style={{textTransform:"capitalize",padding:"5px 20px",background:`${colors.blueVariant}`,color:"white"}} disabled={formik.isSubmitting}>
+                        Signin with Google
+                    </Button>
+                </div>                
                 <div style={{marginTop:"20px",display:"flex",rowGap:"5px",flexDirection:"column",alignItems:"center"}}>
                     <p style={{fontSize:"15px"}}>Don't have an account?</p>
                     <Link style={{fontSize:"15px"}} to="/register">Signup</Link>

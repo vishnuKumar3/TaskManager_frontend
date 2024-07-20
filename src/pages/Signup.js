@@ -8,6 +8,7 @@ import {Button} from "@mui/material"
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import axios from "axios"
 import {message} from "antd"
+import { useGoogleLogin } from '@react-oauth/google';
 
 
 const useStyles = makeStyles((theme)=>({
@@ -38,6 +39,28 @@ export default function Signup(){
     const [fileObj, setFileObj] = useState({})
     const [messageApi, contextHolder] = message.useMessage()
 
+    const googleLogin = useGoogleLogin({
+        onSuccess: async(codeResponse)=>{
+            console.log("google response...",codeResponse);
+            let userData = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${codeResponse.access_token}`);
+            console.log(userData)
+            if(userData?.data?.email){
+                let userInfo = {
+                    email:userData?.data?.email,
+                    firstName:userData?.data?.given_name,
+                    password:"google-signin",
+                    lastName:userData?.data?.family_name,
+                    avatarInfo:{
+                        Location:userData?.data?.picture
+                    }
+                }
+                setFileObj({})
+                handleGoogleSignup(userInfo, "google")
+            }
+        },
+        onError: (error) => {console.log('Login Failed:', error);messageApi.open({type:"error",content:error,duration:5})}
+    });     
+
     const handleChange = (event)=>{
         console.log("file info",event.target.files)
         let files = event.target.files;
@@ -45,14 +68,34 @@ export default function Signup(){
         setFileObj(files?.[0] || {})
     }
 
-    const handleFormData = async (formValues)=>{
+    const handleGoogleSignup = async (formValues, signInType)=>{
+        formValues["signInType"] ="google";
+        let res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/user/signup`,formValues,{
+            headers:{
+                "Content-Type":"application/json"
+            }
+        });
+        if(res?.data?.status?.toLowerCase() === "success"){
+            messageApi.open({content:res?.data?.message,type:"success",duration:5})
+        }
+        else{
+            messageApi.open({content:res?.data?.message,type:"error",duration:5})
+        }        
+    }
+
+    const handleFormData = async (formValues, signInType)=>{
         let formData = new FormData();
         Object.entries(formValues).map(([key,value])=>{
             formData.append(key,value);
         })
-        formData.append("avatar",fileObj);
+        if(fileObj && Object.keys(fileObj).length>0){
+            formData.append("avatar",fileObj);
+        }
         formData.append("signInType","normal");
-        let res = await axios.post("http://localhost:8080/user/signup",formData);
+        let res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/user/signup`,formData);
+        if(res){
+            setFileObj({})            
+        }
         if(res?.data?.status?.toLowerCase() === "success"){
             messageApi.open({content:res?.data?.message,type:"success",duration:5})
         }
@@ -70,7 +113,7 @@ export default function Signup(){
             validationSchema={LoginSchema}
             onSubmit={(values, { setSubmitting,resetForm }) => {
                 console.log(values,fileObj)
-                handleFormData(values)
+                handleFormData(values, "normal")
                 resetForm()
                 setFilename("")
             }}
@@ -131,10 +174,20 @@ export default function Signup(){
                 />
                 {formik.touched.reEnteredPassword && formik.errors.reEnteredPassword?<p className={`${styles.errorMessage}`}>{formik.errors.reEnteredPassword}</p>:""}                
                 <div style={{display:"flex",justifyContent:"center"}}>
-                    <Button variant={"contained"} type='submit' style={{padding:"5px 20px",background:`${colors.blueVariant}`,color:"white"}} disabled={formik.isSubmitting}>
+                    <Button variant={"contained"} type='submit' style={{textTransform:"capitalize",padding:"5px 20px",background:`${colors.blueVariant}`,color:"white"}} disabled={formik.isSubmitting}>
                         Submit
                     </Button>
                 </div>
+                <div style={{display:"flex",alignItems:'center',columnGap:"5px"}}>
+                    <hr style={{flexGrow:1}}/>
+                    or
+                    <hr style={{flexGrow:1}}/>
+                </div>
+                <div style={{display:"flex",justifyContent:"center"}}>
+                    <Button onClick={googleLogin} variant={"contained"} style={{textTransform:"capitalize",padding:"5px 20px",background:`${colors.blueVariant}`,color:"white"}} disabled={formik.isSubmitting}>
+                        Signup with Google
+                    </Button>
+                </div>                  
                 <div style={{marginTop:"20px",display:"flex",rowGap:"5px",flexDirection:"column",alignItems:"center"}}>
                     <p style={{fontSize:"15px"}}>Already have an account?</p>
                     <Link style={{fontSize:"15px"}} to="/login">Login</Link>
