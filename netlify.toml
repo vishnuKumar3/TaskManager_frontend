@@ -1,5 +1,0 @@
-[[redirects]]
-  from = "/search"
-  to = "https://task-manager-backend-chi.vercel.app/"
-  status = 200
-  force = true
