@@ -21,7 +21,6 @@ interceptor.interceptors.request.use(function (config) {
     const accessToken = getCookie("accessToken")
     console.log("access-token",accessToken)
     config.headers["Authorization"] = `Bearer ${accessToken}`;
-    config.headers["Access-Control-Allow-Origin"] = "*";
     return config;
   }, function (error) {
     console.log("Error occurred - ",error)
