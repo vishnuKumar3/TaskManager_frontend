@@ -85,7 +85,8 @@ export default function Signup(){
         let res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/user/signup`,formValues,{
             headers:{
                 "Content-Type":"application/json",
-                "Access-Control-Allow-Origin":"*"
+                "Access-Control-Allow-Origin":"*",
+                "access-control-allow-credentials":true
             }
         });
         if(res){
@@ -111,7 +112,8 @@ export default function Signup(){
         formData.append("signInType","normal");
         let res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/user/signup`,formData,{
             headers:{
-                "Access-Control-Allow-Origin":"*"
+                "Access-Control-Allow-Origin":"*",
+                "access-control-allow-credentials":true
             }
         });
         if(res){
