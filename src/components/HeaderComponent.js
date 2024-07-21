@@ -3,17 +3,20 @@ import { colors } from "../colour_config"
 import { useCookies } from "react-cookie"
 import {Button,IconButton} from "@mui/material"
 import LogoutIcon from '@mui/icons-material/Logout';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ListItemIcon from '@mui/material/ListItemIcon';
+import { useSelector } from "react-redux";
+import { setUser } from "../reducers/user";
 
 
 
 export default function HeaderComponent(){
     const [cookies, setCookie, removeCookie] = useCookies()
     const [anchorElement, setAnchorElement] = useState(null);
+    const user = useSelector((state)=>state.user);
     const navigate = useNavigate()
     const open = Boolean(anchorElement);
     const handleClose = () => {
@@ -22,6 +25,7 @@ export default function HeaderComponent(){
 
     const logout = ()=>{
         removeCookie("accessToken");
+        setUser({})        
         navigate("/login")
     }
 
@@ -32,14 +36,18 @@ export default function HeaderComponent(){
     return(
         <>
             <div style={{display:"flex",flexDirection:"column",rowGap:"20px",alignItems:"center",width:"100%"}}>
-                <div style={{display:"flex",flexDirection:"row-reverse",alignItems:"center",width:"100%",height:"50px",border:"none",background:`#1976D2`,padding:"0px 20px",position:"fixed",top:0,left:0}}>
+                <div style={{columnGap:"10px",zIndex:10,display:"flex",flexDirection:"row-reverse",alignItems:"center",width:"100%",height:"50px",border:"none",background:`#1976D2`,padding:"0px 20px",position:"fixed",top:0,left:0}}>
                 <IconButton
                     onClick={handleClick}
                     size="small"
                     sx={{ ml: 2 }}
                 >
-                 <img style={{width:"40px",height:"40px",borderRadius:"100%"}} src="https://lh3.googleusercontent.com/a/ACg8ocJO68Q1ifQxmLyj2XGgW4FjpL3wjTuQtPkdPbTr_f_no9eXVg=s96-c"/>   
-                </IconButton>    
+                 {user?.userData?.avatarInfo?.Location?
+                    <img style={{width:"40px",height:"40px",borderRadius:"100%"}} src={`${user?.userData?.avatarInfo?.Location || ""}`}/> :
+                    <AccountCircleIcon/>
+                    }  
+                </IconButton>  
+                <p style={{fontSize:"20px",fontWeight:"500"}}>{(user?.userData?.firstName || "")+" "+(user?.userData?.lastName || "")}</p>    
                 <Menu
                     disableScrollLock={true}
                     anchorEl={anchorElement}
@@ -49,7 +57,7 @@ export default function HeaderComponent(){
                     onClick={handleClose}
                     PaperProps={{
                     style:{
-                        paddingRight:"30px"
+                        width:150
                     },
                     elevation: 0,
                     sx: {

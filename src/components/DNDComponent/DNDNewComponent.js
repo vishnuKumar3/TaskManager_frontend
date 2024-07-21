@@ -15,6 +15,18 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import {message} from "antd";
 import Tasks from "../../pages/Tasks";
+import { useTheme } from "@mui/material";
+import {useMediaQuery} from "@mui/material"
+import { width } from "@mui/system";
+import AutorenewIcon from '@mui/icons-material/Autorenew';
+import AddTaskIcon from '@mui/icons-material/AddTask';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import InputLabel from '@mui/material/InputLabel';
+
+
 
 const data={
   "todo":[{"taskId":"669c017fb49303fcedaeb","state":"todo","title":"task1","description":"task1 description","createdAtUnixTime":1721500031016.0},
@@ -24,20 +36,6 @@ const data={
   "completed":[{"taskId":"669c017fb49303cedaeb292","state":"completed","title":"task3","description":"task1 description","createdAtUnixTime":1721500031016.0}],
 }
 
-
-const useStyles = makeStyles((theme)=>({
-  input:{
-      width:"100%",
-      padding:"10px",
-      fontSize:"15px",
-      borderRadius:"5px",
-      border:`1px solid ${colors.borderGrayColor}`
-  },
-  errorMessage:{
-      color:"red",
-      fontSize:"12px"
-  }
-}))
 
 // fake data generator
 const getItems = (count, offset = 0) =>
@@ -84,28 +82,73 @@ const getItemStyle = (isDragging, draggableStyle) => ({
   // styles we need to apply on draggables
   ...draggableStyle
 });
-const getListStyle = isDraggingOver => ({
-  background: isDraggingOver ? "lightblue" : "initial",
-  display:"flex",
-  flexDirection:"column",
-  alignItems:"flex-start",
-  rowGap:"15px",
-  border:"none",
-  width: "30%"
-});
+
 
 
 export default function DNDNewComponent(props) {
   const [state, setState] = useState([[], [], []]);
   const taskStateheadings = ["Todo","In-progress","Completed"]
+  const taskStateIcons = [<AddTaskIcon/>,<AutorenewIcon/>,<CheckCircleIcon/>]
   const taskStates = ["todo","in-progress","completed"]
   const [taskTitle, setTasktitle] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
   const [taskFormOpen, setTaskFormOpen] = useState(false)
-  const styles = useStyles()
   const [keyword, setKeyword] = useState("")
   const dispatch = useDispatch()
   const [messageApi, contextHolder] = message.useMessage()
+  const theme = useTheme();
+  const mobileDevice = useMediaQuery(theme.breakpoints.down("md"))
+  const [sortItem, setSortItem] = useState("");
+  const sortItems = {"date":"createdAtUnixTime","name":"title"};
+
+  const handleSortItemChange = (event) => {
+    let value = event?.target?.value;
+    let sort = {};
+    sort[sortItems[value]] = 1;
+    setSortItem(value)
+    fetchAllTasks(sort)
+  };
+
+  const useStyles = makeStyles(()=>({
+    input:{
+        width:"100%",
+        padding:"10px",
+        fontSize:"15px",
+        borderRadius:"5px",
+        border:`1px solid ${colors.borderGrayColor}`
+    },
+    errorMessage:{
+        color:"red",
+        fontSize:"12px"
+    },
+    taskContainer:{ 
+      display: "flex",
+      minHeight:"400px",
+      maxHeight:"max-content",
+      flexDirection:mobileDevice?"column":"row",
+      width:"100%",
+      rowGap:mobileDevice?"20px":"initial",
+      justifyContent:"space-between",
+      background:`${colors.grayVariant}`,
+      padding:mobileDevice?"20px 20px":"30px 50px",
+      borderRadius:"10px",
+    }
+  }))  
+
+  const getListStyle = isDraggingOver => ({
+    background: isDraggingOver ? "lightblue" : "initial",
+    display:"flex",
+    flexDirection:"column",
+    alignItems:"flex-start",
+    rowGap:"15px",
+    border:"none",
+    width:mobileDevice?"100%":'30%',
+    minHeight:mobileDevice?"100px":"initial",
+    maxHeight:mobileDevice?"max-content":"initial",
+  });  
+
+  const styles = useStyles()
+
 
   const handleClose = ()=>{
     setTaskFormOpen(false)
@@ -155,8 +198,9 @@ export default function DNDNewComponent(props) {
 
   }
 
-  const fetchAllTasks = ()=>{
-    dispatch(fetchTasks({keyword:keyword})).then((action)=>{
+  const fetchAllTasks = (sort)=>{
+    let sortCriteria = sort?sort:{};
+    dispatch(fetchTasks({keyword:keyword,sort:sortCriteria})).then((action)=>{
       setKeyword("")
       if(action?.error){
         messageApi.open({content:action?.payload?.message,type:"error",duration:5})
@@ -241,14 +285,33 @@ export default function DNDNewComponent(props) {
     <div style={{width:"100%",display:"flex",flexDirection:"column",rowGap:"20px",padding:"30px 20px"}}>
       {dialogComponent()}
       {contextHolder}
-      <Button onClick={()=>setTaskFormOpen(true)} style={{textTransform:"capitalize",width:"max-content"}} variant={"contained"}>
-        New task +
-      </Button>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",flexWrap:"wrap"}}>
+        <Button onClick={()=>setTaskFormOpen(true)} style={{textTransform:"capitalize",width:"max-content"}} variant={"contained"}>
+          New task +
+        </Button>
+        <div style={{display:"flex",alignItems:"center",columnGap:"10px"}}>
+          <p style={{fontSize:"15px",fontWeight:"600"}}>Sort By </p>
+          <Select
+            style={{width:"100px",height:"30px"}}
+            value={sortItem}
+            onChange={handleSortItemChange}
+          >
+            {Object.keys(sortItems).map((name) => (
+              <MenuItem
+                key={name}
+                value={name}
+              >
+                {name}
+              </MenuItem>
+            ))}
+          </Select> 
+        </div>       
+      </div>
       <div style={{display:"flex",alignItems:"center",columnGap:"10px"}}>
         <input onChange={(e)=>setKeyword(e.target.value)} style={{width:"80%"}} type="text" placeholder="enter keyword to search" className={styles.input}/>
         <Button onClick={fetchAllTasks} variant={"contained"} style={{textTransform:"capitalize"}}>Search</Button>
       </div>
-      <div style={{ display: "flex",minHeight:"400px",maxHeight:"max-content",width:"100%",justifyContent:"space-between",background:`${colors.grayVariant}`,padding:"30px 50px",borderRadius:"10px" }}>
+      <div className={styles.taskContainer}>
         <DragDropContext onDragEnd={onDragEnd} style={{width:"100%"}}>
           {state.map((el, ind) => (
             <Droppable key={ind} droppableId={`${ind}`}>
@@ -258,8 +321,11 @@ export default function DNDNewComponent(props) {
                   style={getListStyle(snapshot.isDraggingOver)}
                   {...provided.droppableProps}
                 >
-                  <p style={{fontSize:"20px",marginBottom:"20px",textTransform:"capitalize",fontWeight:600}}>{taskStateheadings[ind]}</p>
-                  {el.map((item, index) => (
+                  <div style={{marginBottom:mobileDevice?"0px":"20px",display:'flex',flexDirection:"row",alignItems:"center",columnGap:"10px"}}>
+                    {taskStateIcons[ind]}
+                    <p style={{fontSize:mobileDevice?"15px":"20px",textTransform:"capitalize",fontWeight:600}}>{taskStateheadings[ind]}</p>
+                  </div>
+                  {el.length > 0 ? el.map((item, index) => (
                     <Draggable
                       key={item.taskId}
                       draggableId={item.taskId}
@@ -282,12 +348,16 @@ export default function DNDNewComponent(props) {
                               width:"100%"
                             }}
                           >
-                            <TaskComponent fetchAllTasks={fetchAllTasks} title={item?.title} taskId={item?.taskId} description={item?.description}/>
+                            <TaskComponent fetchAllTasks={fetchAllTasks} createdAt={item?.createdAt} title={item?.title} taskId={item?.taskId} description={item?.description}/>
                           </div>
                         </div>
                       )}
                     </Draggable>
-                  ))}
+                  )):
+                  <div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                    <p style={{fontSize:mobileDevice?"15px":"20px",fontWeight:"600"}}>No Data</p>
+                  </div>
+                  }
                   {provided.placeholder}
                 </div>
               )}

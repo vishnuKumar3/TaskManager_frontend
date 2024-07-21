@@ -5,6 +5,7 @@ import DNDNewComponent from "./components/DNDComponent/DNDNewComponent"
 import Login from "./pages/Login"
 import Signup from "./pages/Signup"
 import HeaderComponent from "./components/HeaderComponent"
+import NotFound from "./pages/NotFound"
 
 export default function Routes(){
     return useRoutes([{
@@ -28,6 +29,10 @@ export default function Routes(){
         {
             path:'register',
             element:<Signup/>
+        },
+        {
+            path:"*",
+            element:<NotFound/>
         }
     ])
 }

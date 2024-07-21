@@ -7,11 +7,13 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import {message} from "antd";
+import {message, theme} from "antd";
 import {makeStyles} from "@mui/styles"
 import {useState} from "react";
 import { useDispatch } from "react-redux";
 import { updateTaskById } from "../reducers/tasks";
+import { useTheme } from "@mui/material";
+import {useMediaQuery} from "@mui/material"
 
 const useStyles = makeStyles((theme)=>({
     input:{
@@ -35,6 +37,9 @@ export default function TaskComponent(props){
     const dispatch = useDispatch()
     const [messageApi, contextHolder] = message.useMessage()
     const styles = useStyles()
+    const theme = useTheme()
+    const mobileDevice = useMediaQuery(theme.breakpoints.down("md"))
+    const dateObj = new Date(props?.createdAt);
   
     const handleClose = ()=>{
       setTaskFormOpen(false)
@@ -45,8 +50,6 @@ export default function TaskComponent(props){
       setTaskDescription("");
     }    
 
-    const taskSelection = (event)=>{
-    }
 
     const updateTask = ()=>{
         handleClose()
@@ -112,11 +115,10 @@ export default function TaskComponent(props){
             {dialogComponent()}
             {contextHolder}            
             <div style={{display:"flex",alignItems:"center", columnGap:"20px"}}>
-                <input type="checkbox" style={{width:"20px",height:"20px"}} onChange={taskSelection}/>
                 <div style={{display:"flex",flexDirection:"column",rowGap:"3px"}}>
-                    <p style={{fontWeight:"600",fontSize:"20px"}}>{props?.title || "Task title"}</p>
-                    <p style={{}}>{props?.description || "Task description"}</p>
-                    <p style={{fontSize:"12px"}}>Created At: 5:23 AM, 01/06/2022</p>
+                    <p style={{fontWeight:"600",fontSize:mobileDevice?"15px":"20px"}}>{props?.title || "Task title"}</p>
+                    <p style={{fontSize:mobileDevice?"13px":"initial",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{props?.description || "Task description"}</p>
+                    <p style={{fontSize:"12px"}}>{dateObj.toLocaleString()}</p>
                 </div>
             </div>
             <div style={{display:"flex",alignItems:"center",columnGap:"5px"}}>

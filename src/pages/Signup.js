@@ -9,6 +9,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import axios from "axios"
 import {message} from "antd"
 import { useGoogleLogin } from '@react-oauth/google';
+import {LinearProgress} from "@mui/material"
 
 
 const useStyles = makeStyles((theme)=>({
@@ -38,6 +39,7 @@ export default function Signup(){
     const [fileName, setFilename] = useState("");
     const [fileObj, setFileObj] = useState({})
     const [messageApi, contextHolder] = message.useMessage()
+    const [showProgress, setShowProgress] = useState(false);
 
     const googleLogin = useGoogleLogin({
         onSuccess: async(codeResponse)=>{
@@ -63,18 +65,31 @@ export default function Signup(){
 
     const handleChange = (event)=>{
         console.log("file info",event.target.files)
-        let files = event.target.files;
-        setFilename(files?.[0]?.name || "");
-        setFileObj(files?.[0] || {})
+        const maxSize = 2 * 1024 * 1024; 
+        if (event.target.files && event.target.files[0].size > maxSize) {
+            messageApi.open({content:"File size exceeds 2 MB",type:"warning",duration:5});
+            event.target.value = "";
+        }else if(event.target.files && !(event.target.files[0].type.includes("image"))){ 
+            messageApi.open({content:"Please upload files of type image only",type:"warning",duration:5});
+        }       
+        else{
+            let files = event.target.files;
+            setFilename(files?.[0]?.name || "");
+            setFileObj(files?.[0] || {})
+        }
     }
 
     const handleGoogleSignup = async (formValues, signInType)=>{
+        setShowProgress(true)
         formValues["signInType"] ="google";
         let res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/user/signup`,formValues,{
             headers:{
                 "Content-Type":"application/json"
             }
         });
+        if(res){
+            setShowProgress(false);
+        }
         if(res?.data?.status?.toLowerCase() === "success"){
             messageApi.open({content:res?.data?.message,type:"success",duration:5})
         }
@@ -84,6 +99,7 @@ export default function Signup(){
     }
 
     const handleFormData = async (formValues, signInType)=>{
+        setShowProgress(true)
         let formData = new FormData();
         Object.entries(formValues).map(([key,value])=>{
             formData.append(key,value);
@@ -95,6 +111,7 @@ export default function Signup(){
         let res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/user/signup`,formData);
         if(res){
             setFileObj({})            
+            setShowProgress(false)
         }
         if(res?.data?.status?.toLowerCase() === "success"){
             messageApi.open({content:res?.data?.message,type:"success",duration:5})
@@ -103,7 +120,7 @@ export default function Signup(){
             messageApi.open({content:res?.data?.message,type:"error",duration:5})
         }        
         console.log("response from signup api",res.data);
-    }
+    }  
 
     return(
         <div style={{display:"flex",justifyContent:"center",alignItems:"center",width:"100%",background:`linear-gradient(340deg,${colors.blueVariant} 50%,white 1%`,height:"max-content",padding:"50px 0px"}}>
@@ -120,6 +137,7 @@ export default function Signup(){
             >
             {(formik) => (
                 <form ref={formRef} style={{background:"white",width:"350px",rowGap:"15px",border:"1px solid #aaaaaa99",borderRadius:"10px",display:"flex",flexDirection:"column",padding:"30px 30px 50px 30px"}} onSubmit={formik.handleSubmit}>
+                {showProgress && <LinearProgress/>}                    
                 <p style={{fontSize:"30px",fontWeight:"600",padding:"0px 0px 20px 0px"}}>Signup</p>    
                 <input
                     className={`${styles.input}`}
@@ -140,9 +158,10 @@ export default function Signup(){
                     onBlur={formik.handleBlur}
                     value={formik.values.lastName}
                 /> 
-                <label htmlFor="file-upload" style={{display:"flex",alignItems:"center",columnGap:"5px"}}>Upload Avatar <CloudUploadIcon/></label>
-                <input type="file" name="avatar" style={{position:"absolute",zIndex:-1,opacity:0}} onChange={handleChange} id="file-upload"/>
+                <label htmlFor="file-upload" style={{cursor:"pointer",display:"flex",alignItems:"center",columnGap:"5px"}}>Upload Avatar <CloudUploadIcon/></label>
+                <input type="file" accept='image/*' name="avatar" style={{position:"absolute",zIndex:-1,opacity:0}} onChange={handleChange} id="file-upload"/>
                 {fileName && <p style={{fontSize:"12px",color:"lime"}}>{fileName}</p>}
+                {!fileName && <p style={{fontSize:"12px",color:"red"}}>Only image files within 2MB are accepted</p>}
                  <input
                     className={`${styles.input}`}
                     type="text"

@@ -9,6 +9,9 @@ import axios from "axios"
 import {message} from "antd"
 import { useGoogleLogin } from '@react-oauth/google';
 import { useCookies } from 'react-cookie';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../reducers/user';
+import {LinearProgress} from "@mui/material"
 
 
 const useStyles = makeStyles((theme)=>({
@@ -36,6 +39,8 @@ export default function Login(){
     const navigate = useNavigate();
     const [cookies, setCookie, removeCookie] = useCookies()
     const [messageApi, contextHolder] = message.useMessage()
+    const [showProgress, setShowProgress] = useState(false);
+    const dispatch = useDispatch();
 
     const googleLogin = useGoogleLogin({
         onSuccess: async(codeResponse)=>{
@@ -53,16 +58,23 @@ export default function Login(){
     });    
 
     const handleSignin = async (formValues, signInType)=>{
+        setShowProgress(true)
         formValues["signInType"] = signInType
         let res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/user/login`,formValues,{
             headers:{
                 "Content-Type":"application/json"
             }
         });
+        if(res){
+            setShowProgress(false)
+        }
         if(res?.data?.status?.toLowerCase() === "success"){
             if(res?.data?.token){
-                setCookie("accessToken",res?.data?.token)
+                let dateObj = new Date();
+                dateObj.setTime(dateObj.getTime()+(24*60*60*1000))
+                setCookie("accessToken",res?.data?.token,{expires:dateObj})
             }
+            dispatch(setUser(res?.data?.userData));
             messageApi.open({content:res?.data?.message,type:"success",duration:5})
             navigate("/tasks",{replace:true})
         }
@@ -86,6 +98,7 @@ export default function Login(){
             >
             {(formik) => (
                 <form ref={formRef} style={{background:"white",width:"350px",rowGap:"10px",border:"1px solid #aaaaaa99",borderRadius:"10px",display:"flex",flexDirection:"column",padding:"30px 30px 50px 30px"}} onSubmit={formik.handleSubmit}>
+                {showProgress && <LinearProgress />}                    
                 <p style={{fontSize:"30px",fontWeight:"600",padding:"0px 0px 20px 0px"}}>Login</p>    
                 <input
                     className={`${styles.input}`}
