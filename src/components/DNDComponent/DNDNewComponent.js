@@ -309,7 +309,7 @@ export default function DNDNewComponent(props) {
       </div>
       <div style={{display:"flex",alignItems:"center",columnGap:"10px"}}>
         <input onChange={(e)=>setKeyword(e.target.value)} style={{width:"80%"}} type="text" placeholder="enter keyword to search" className={styles.input}/>
-        <Button onClick={fetchAllTasks} variant={"contained"} style={{textTransform:"capitalize"}}>Search</Button>
+        <Button onClick={()=>fetchAllTasks({})} variant={"contained"} style={{textTransform:"capitalize"}}>Search</Button>
       </div>
       <div className={styles.taskContainer}>
         <DragDropContext onDragEnd={onDragEnd} style={{width:"100%"}}>
