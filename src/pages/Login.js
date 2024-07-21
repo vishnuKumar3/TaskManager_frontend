@@ -63,8 +63,7 @@ export default function Login(){
         let res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/user/login`,formValues,{
             headers:{
                 "Content-Type":"application/json",
-                "Access-Control-Allow-Origin":"*",
-                "access-control-allow-credentials":true
+                "Access-Control-Allow-Origin":"*"
             }
         });
         if(res){
