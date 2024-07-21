@@ -84,7 +84,8 @@ export default function Signup(){
         formValues["signInType"] ="google";
         let res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/user/signup`,formValues,{
             headers:{
-                "Content-Type":"application/json"
+                "Content-Type":"application/json",
+                "Access-Control-Allow-Origin":"*"
             }
         });
         if(res){
@@ -108,7 +109,11 @@ export default function Signup(){
             formData.append("avatar",fileObj);
         }
         formData.append("signInType","normal");
-        let res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/user/signup`,formData);
+        let res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/user/signup`,formData,{
+            headers:{
+                "Access-Control-Allow-Origin":"*"
+            }
+        });
         if(res){
             setFileObj({})            
             setShowProgress(false)
