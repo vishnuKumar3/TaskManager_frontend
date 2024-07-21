@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState ,useRef} from "react";
 import ReactDOM from "react-dom";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import TaskComponent from "../TaskComponent";
 import ColumnGroup from "antd/es/table/ColumnGroup";
 import {Button} from "@mui/material"
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { createTask,fetchTasks,updateTaskById } from "../../reducers/tasks";
 import { colors } from "../../colour_config";
 import {makeStyles} from "@mui/styles"
 import Dialog from '@mui/material/Dialog';
@@ -12,6 +13,8 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import {message} from "antd";
+import Tasks from "../../pages/Tasks";
 
 const data={
   "todo":[{"taskId":"669c017fb49303fcedaeb","state":"todo","title":"task1","description":"task1 description","createdAtUnixTime":1721500031016.0},
@@ -93,22 +96,94 @@ const getListStyle = isDraggingOver => ({
 
 
 export default function DNDNewComponent(props) {
-  const [state, setState] = useState([data?.todo, data?.inProgress, data?.completed]);
-  const [open, setOpen] = useState(false)
+  const [state, setState] = useState([[], [], []]);
+  const taskStateheadings = ["Todo","In-progress","Completed"]
+  const taskStates = ["todo","in-progress","completed"]
+  const [taskTitle, setTasktitle] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
+  const [taskFormOpen, setTaskFormOpen] = useState(false)
   const styles = useStyles()
+  const [keyword, setKeyword] = useState("")
+  const dispatch = useDispatch()
+  const [messageApi, contextHolder] = message.useMessage()
 
   const handleClose = ()=>{
-    setOpen(false)
+    setTaskFormOpen(false)
+  }
+
+  const clearTaskForm = ()=>{
+    setTasktitle("");
+    setTaskDescription("");
   }
 
   useEffect(()=>{
-    
+    fetchAllTasks()
   },[])
+
+  const updateTask = (taskId, updateInfo)=>{
+    handleClose()
+    dispatch(updateTaskById({taskId:taskId,updateInfo:updateInfo})).then((action)=>{
+      clearTaskForm()
+      if(action?.error){
+        messageApi.open({content:action?.payload?.message,type:"error",duration:5})
+      }
+      else{
+        messageApi.open({content:action?.payload?.message,type:"success",duration:5})
+        fetchAllTasks()
+      }
+    }).catch((err)=>{
+      clearTaskForm()
+      messageApi.open({content:err?.message,type:"error",duration:5})
+    })
+  } 
+
+  const taskCreation = ()=>{
+    handleClose()
+    dispatch(createTask({title:taskTitle,description:taskDescription})).then((action)=>{
+      clearTaskForm()
+      if(action?.error){
+        messageApi.open({content:action?.payload?.message,type:"error",duration:5})
+      }
+      else{
+        messageApi.open({content:action?.payload?.message,type:"success",duration:5})
+        fetchAllTasks()
+      }
+    }).catch((err)=>{
+      clearTaskForm()
+      messageApi.open({content:err?.message,type:"error",duration:5})
+    })
+
+  }
+
+  const fetchAllTasks = ()=>{
+    dispatch(fetchTasks({keyword:keyword})).then((action)=>{
+      setKeyword("")
+      if(action?.error){
+        messageApi.open({content:action?.payload?.message,type:"error",duration:5})
+      }
+      else{
+        let tasks = action?.payload?.tasks;
+        let allTasks = [[],[],[]];
+        taskStates.map((taskState,index)=>{
+          if(tasks[taskState]){
+            allTasks[index] = tasks[taskState]
+          }
+        })
+        console.log(allTasks)
+        setState(allTasks)
+        messageApi.open({content:action?.payload?.message,type:"success"})
+      }
+    }).catch((err)=>{
+      setKeyword("")
+      messageApi.open({content:err?.message,type:"error",duration:5})
+    })
+
+  }
 
   const dialogComponent = ()=>{
     return(
     <Dialog
-      open={open}
+      open={taskFormOpen}
       onClose={handleClose}
     >
       <DialogTitle>
@@ -116,13 +191,13 @@ export default function DNDNewComponent(props) {
       </DialogTitle>
       <DialogContent>
         <div style={{width:"400px",padding:"10px 0px",display:"flex",flexDirection:"column",rowGap:"15px"}}>
-          <input type="text" placeholder="Task title" className={styles.input}/>
-          <input type="text" placeholder="Task description" className={styles.input}/>
+          <input type="text" onChange={(e)=>setTasktitle(e.target.value)} placeholder="Task title" className={styles.input}/>
+          <input type="text" onChange={(e)=>setTaskDescription(e.target.value)} placeholder="Task description" className={styles.input}/>
         </div>
       </DialogContent>
       <DialogActions>
         <Button style={{textTransform:"capitalize"}} onClick={handleClose}>Cancel</Button>
-        <Button style={{textTransform:"capitalize"}} onClick={handleClose}>
+        <Button style={{textTransform:"capitalize"}} onClick={taskCreation}>
           Create
         </Button>
       </DialogActions>
@@ -133,6 +208,7 @@ export default function DNDNewComponent(props) {
   function onDragEnd(result) {
     const { source, destination } = result;
     console.log(source,destination,result)
+    let resultData = {...result}
     // dropped outside the list
     if (!destination) {
       return;
@@ -146,21 +222,33 @@ export default function DNDNewComponent(props) {
       newState[sInd] = items;
       setState(newState);
     } else {
+
       const result = move(state[sInd], state[dInd], source, destination);
       const newState = [...state];
       newState[sInd] = result[sInd];
       newState[dInd] = result[dInd];
       setState(newState);
+      let destinationIndex = resultData?.destination?.droppableId;
+      if(resultData?.destination && resultData?.destination?.hasOwnProperty("droppableId") && destinationIndex>=0){
+        updateTask(resultData?.draggableId,{
+          state:taskStates[destinationIndex]
+        })
+      }
     }
   }
 
   return (
     <div style={{width:"100%",display:"flex",flexDirection:"column",rowGap:"20px",padding:"30px 20px"}}>
       {dialogComponent()}
-      <Button onClick={()=>setOpen(true)} style={{textTransform:"capitalize",width:"max-content"}} variant={"contained"}>
+      {contextHolder}
+      <Button onClick={()=>setTaskFormOpen(true)} style={{textTransform:"capitalize",width:"max-content"}} variant={"contained"}>
         New task +
       </Button>
-      <div style={{ display: "flex",width:"100%",justifyContent:"space-between",background:`${colors.grayVariant}`,padding:"30px 50px",borderRadius:"10px" }}>
+      <div style={{display:"flex",alignItems:"center",columnGap:"10px"}}>
+        <input onChange={(e)=>setKeyword(e.target.value)} style={{width:"80%"}} type="text" placeholder="enter keyword to search" className={styles.input}/>
+        <Button onClick={fetchAllTasks} variant={"contained"} style={{textTransform:"capitalize"}}>Search</Button>
+      </div>
+      <div style={{ display: "flex",minHeight:"400px",maxHeight:"max-content",width:"100%",justifyContent:"space-between",background:`${colors.grayVariant}`,padding:"30px 50px",borderRadius:"10px" }}>
         <DragDropContext onDragEnd={onDragEnd} style={{width:"100%"}}>
           {state.map((el, ind) => (
             <Droppable key={ind} droppableId={`${ind}`}>
@@ -170,7 +258,7 @@ export default function DNDNewComponent(props) {
                   style={getListStyle(snapshot.isDraggingOver)}
                   {...provided.droppableProps}
                 >
-                  <p style={{fontSize:"20px",marginBottom:"20px",textTransform:"capitalize",fontWeight:600}}>todo</p>
+                  <p style={{fontSize:"20px",marginBottom:"20px",textTransform:"capitalize",fontWeight:600}}>{taskStateheadings[ind]}</p>
                   {el.map((item, index) => (
                     <Draggable
                       key={item.taskId}
@@ -194,7 +282,7 @@ export default function DNDNewComponent(props) {
                               width:"100%"
                             }}
                           >
-                            <TaskComponent title={item?.title} description={item?.description}/>
+                            <TaskComponent fetchAllTasks={fetchAllTasks} title={item?.title} taskId={item?.taskId} description={item?.description}/>
                           </div>
                         </div>
                       )}
