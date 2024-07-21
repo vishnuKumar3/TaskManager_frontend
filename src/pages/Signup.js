@@ -104,7 +104,7 @@ export default function Signup(){
         Object.entries(formValues).map(([key,value])=>{
             formData.append(key,value);
         })
-        if(fileObj && Object.keys(fileObj).length>0){
+        if(fileObj){
             formData.append("avatar",fileObj);
         }
         formData.append("signInType","normal");
