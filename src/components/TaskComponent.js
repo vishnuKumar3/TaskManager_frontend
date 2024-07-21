@@ -14,6 +14,7 @@ import { useDispatch } from "react-redux";
 import { updateTaskById } from "../reducers/tasks";
 import { useTheme } from "@mui/material";
 import {useMediaQuery} from "@mui/material"
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 const useStyles = makeStyles((theme)=>({
     input:{
@@ -34,6 +35,8 @@ export default function TaskComponent(props){
     const [taskTitle, setTasktitle] = useState(props?.title);
     const [taskDescription, setTaskDescription] = useState(props?.description);
     const [taskFormOpen, setTaskFormOpen] = useState(false)
+    const [deleteConfirmation, setDeleteConfirmation] = useState(false);
+    const [displayTask, setDisplayTask] = useState(false);
     const dispatch = useDispatch()
     const [messageApi, contextHolder] = message.useMessage()
     const styles = useStyles()
@@ -109,10 +112,55 @@ export default function TaskComponent(props){
         </Dialog>    
       )
       }      
+
+      const deleteConfirmationComponent = ()=>{
+        return(
+        <Dialog
+          open={deleteConfirmation}
+          onClose={()=>setDeleteConfirmation(false)}
+        >
+          <DialogTitle>
+            Are you sure you want to delete task ?
+          </DialogTitle>
+          <DialogContent>
+                If you are confirm to delete, please click 'Delete.' If you wish to keep the task, click 'Cancel.' This action cannot be undone.            
+          </DialogContent>
+          <DialogActions>
+            <Button style={{textTransform:"capitalize"}} onClick={()=>setDeleteConfirmation(false)}>Cancel</Button>
+            <Button style={{textTransform:"capitalize"}} onClick={deleteTask}>
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>    
+      )
+      }       
+
+      const showTask = ()=>{
+        return(
+        <Dialog
+          open={displayTask}
+          onClose={()=>setDisplayTask(false)}
+        >
+          <DialogTitle>
+            {props?.title || "Task Title"}
+          </DialogTitle>
+          <DialogContent>
+            <div style={{width:"400px",padding:"10px 0px",display:"flex",flexDirection:"column",rowGap:"15px"}}>
+                <p>{props?.description || "Task Description"}</p>
+            </div>
+          </DialogContent>
+          <DialogActions>
+            <Button style={{textTransform:"capitalize"}} onClick={()=>setDisplayTask(false)}>Cancel</Button>
+          </DialogActions>
+        </Dialog>    
+      )
+      }         
     
     return(
         <div style={{border:"none",borderRadius:"8px",background:"white",width:'100%',padding:"20px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             {dialogComponent()}
+            {deleteConfirmationComponent()}
+            {showTask()}
             {contextHolder}            
             <div style={{display:"flex",alignItems:"center", columnGap:"20px"}}>
                 <div style={{display:"flex",flexDirection:"column",rowGap:"3px"}}>
@@ -122,7 +170,8 @@ export default function TaskComponent(props){
                 </div>
             </div>
             <div style={{display:"flex",alignItems:"center",columnGap:"5px"}}>
-                <IconButton onClick={deleteTask}><DeleteIcon fontSize="small"/></IconButton>
+                <IconButton onClick={()=>setDisplayTask(true)}><VisibilityIcon fontSize="small"/></IconButton>                
+                <IconButton onClick={()=>setDeleteConfirmation(true)}><DeleteIcon fontSize="small"/></IconButton>
                 <IconButton onClick={()=>setTaskFormOpen(true)} ><ModeEditIcon fontSize="small"/></IconButton>
             </div>
         </div>
