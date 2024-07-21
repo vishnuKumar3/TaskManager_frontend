@@ -10,6 +10,7 @@ import store from './Store/store';
 import { Provider } from 'react-redux';
 import { persistStore } from 'redux-persist';
 import { PersistGate } from 'redux-persist/integration/react';
+import { CookiesProvider } from 'react-cookie';
 
 
 const persistor = persistStore(store)
@@ -18,11 +19,13 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <Provider store={store}>    
         <PersistGate persistor={persistor}>
-            <GoogleOAuthProvider clientId='595540796921-m3csasrb56jk6iheq9s4cq7etvdft4m3.apps.googleusercontent.com' >    
-                    <BrowserRouter>
-                        <Routes/>
-                    </BrowserRouter>
-            </GoogleOAuthProvider> 
+            <CookiesProvider>            
+                <GoogleOAuthProvider clientId='595540796921-m3csasrb56jk6iheq9s4cq7etvdft4m3.apps.googleusercontent.com' >    
+                        <BrowserRouter>
+                            <Routes/>
+                        </BrowserRouter>
+                </GoogleOAuthProvider> 
+            </CookiesProvider>
         </PersistGate> 
     </Provider>      
 );

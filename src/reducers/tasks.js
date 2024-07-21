@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios"
+import axios from "../interceptor/interceptor"
 
 let tasksReducer = createSlice({
     name:"tasks",

@@ -191,8 +191,8 @@ export default function DNDNewComponent(props) {
       </DialogTitle>
       <DialogContent>
         <div style={{width:"400px",padding:"10px 0px",display:"flex",flexDirection:"column",rowGap:"15px"}}>
-          <input type="text" onChange={(e)=>setTasktitle(e.target.value)} placeholder="Task title" className={styles.input}/>
-          <input type="text" onChange={(e)=>setTaskDescription(e.target.value)} placeholder="Task description" className={styles.input}/>
+          <input type="text" onChange={(e)=>setTasktitle(e.target.value)} placeholder="Task title*" className={styles.input}/>
+          <input type="text" onChange={(e)=>setTaskDescription(e.target.value)} placeholder="Task description*" className={styles.input}/>
         </div>
       </DialogContent>
       <DialogActions>

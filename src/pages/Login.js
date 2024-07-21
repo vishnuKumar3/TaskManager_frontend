@@ -8,6 +8,7 @@ import {Button} from "@mui/material"
 import axios from "axios"
 import {message} from "antd"
 import { useGoogleLogin } from '@react-oauth/google';
+import { useCookies } from 'react-cookie';
 
 
 const useStyles = makeStyles((theme)=>({
@@ -33,6 +34,7 @@ export default function Login(){
     const styles = useStyles()
     const formRef = useRef("")
     const navigate = useNavigate();
+    const [cookies, setCookie, removeCookie] = useCookies()
     const [messageApi, contextHolder] = message.useMessage()
 
     const googleLogin = useGoogleLogin({
@@ -58,8 +60,11 @@ export default function Login(){
             }
         });
         if(res?.data?.status?.toLowerCase() === "success"){
+            if(res?.data?.token){
+                setCookie("accessToken",res?.data?.token)
+            }
             messageApi.open({content:res?.data?.message,type:"success",duration:5})
-            navigate("/tasks")
+            navigate("/tasks",{replace:true})
         }
         else{
             messageApi.open({content:res?.data?.message,type:"error",duration:5})

@@ -93,8 +93,8 @@ export default function TaskComponent(props){
           </DialogTitle>
           <DialogContent>
             <div style={{width:"400px",padding:"10px 0px",display:"flex",flexDirection:"column",rowGap:"15px"}}>
-              <input type="text" value={taskTitle} onChange={(e)=>setTasktitle(e.target.value)} placeholder="Task title" className={styles.input}/>
-              <input type="text" value={taskDescription} onChange={(e)=>setTaskDescription(e.target.value)} placeholder="Task description" className={styles.input}/>
+              <input type="text" value={taskTitle} onChange={(e)=>setTasktitle(e.target.value)} placeholder="Task title*" className={styles.input}/>
+              <input type="text" value={taskDescription} onChange={(e)=>setTaskDescription(e.target.value)} placeholder="Task description*" className={styles.input}/>
             </div>
           </DialogContent>
           <DialogActions>
