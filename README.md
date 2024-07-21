@@ -5,6 +5,9 @@
 <h2>Implemented functionalities</h2>
 <ul>
     <li>Drag-and-drop functionality</li>
+    <li>User profiles with avatars.</li>
+    <li>Search and sort functionality</li>
+    <li>Google login and signup implemented</li>    
     <li>Routing is implemented throughout the application.</li>
     <li>Authentication added by validating token.Added interceptors for passing the token for every request.</li>
     <li>Token expiry added for security purpose</li>
