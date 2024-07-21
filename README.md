@@ -14,9 +14,9 @@
     <li>Responsiveness added</li>
 </ul>    
 <h1>Pages</h1>
-<h2>Login Page</h2>
+<h2>Signup Page</h2>
 <img src="ReadMeFiles/Screenshot from 2024-07-21 17-06-43.png"/>
-<h2>Signup page</h2>
+<h2>Login page</h2>
 <img src="ReadMeFiles//Screenshot from 2024-07-21 17-06-50.png"/>
 <h2>Tasks (Web View)</h2>
 <img src="ReadMeFiles/Screenshot from 2024-07-21 17-07-05.png"/>
