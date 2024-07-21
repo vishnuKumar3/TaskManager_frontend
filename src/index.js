@@ -6,14 +6,25 @@ import {BrowserRouter, Route} from "react-router-dom"
 import Routes from './Routes';
 import reportWebVitals from './reportWebVitals';
 import {GoogleOAuthProvider} from "@react-oauth/google"
+import store from './Store/store';
+import { Provider } from 'react-redux';
+import { persistStore } from 'redux-persist';
+import { PersistGate } from 'redux-persist/integration/react';
+
+
+const persistor = persistStore(store)
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-    <GoogleOAuthProvider clientId='595540796921-m3csasrb56jk6iheq9s4cq7etvdft4m3.apps.googleusercontent.com' >    
-        <BrowserRouter>
-            <Routes/>
-        </BrowserRouter>
-    </GoogleOAuthProvider>    
+    <Provider store={store}>    
+        <PersistGate persistor={persistor}>
+            <GoogleOAuthProvider clientId='595540796921-m3csasrb56jk6iheq9s4cq7etvdft4m3.apps.googleusercontent.com' >    
+                    <BrowserRouter>
+                        <Routes/>
+                    </BrowserRouter>
+            </GoogleOAuthProvider> 
+        </PersistGate> 
+    </Provider>      
 );
 
 // If you want to start measuring performance in your app, pass a function

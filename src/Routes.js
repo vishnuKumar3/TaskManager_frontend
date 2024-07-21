@@ -1,7 +1,7 @@
 import {useRoutes} from "react-router-dom"
 import Tasks from "./pages/Tasks"
 import App from "./App"
-import QuoteApp from "./components/DNDComponent/DNDNewComponent"
+import DNDNewComponent from "./components/DNDComponent/DNDNewComponent"
 import Login from "./pages/Login"
 import Signup from "./pages/Signup"
 
@@ -16,7 +16,7 @@ export default function Routes(){
         },
         {
             path:"quote",
-            element:<QuoteApp/>
+            element:<DNDNewComponent/>
         },
         {
             path:"login",
