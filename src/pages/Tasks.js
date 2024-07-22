@@ -10,7 +10,7 @@ export default function Tasks(){
 
     useEffect(()=>{
         if(cookies?.accessToken){
-            console.log("cookies",cookies)
+            //nothing to do
         }
         else{
             navigate("/login")

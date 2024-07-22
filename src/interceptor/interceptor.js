@@ -19,11 +19,9 @@ function getCookie(keyName) {
 
 interceptor.interceptors.request.use(function (config) {
     const accessToken = getCookie("accessToken")
-    console.log("access-token",accessToken)
     config.headers["Authorization"] = `Bearer ${accessToken}`;
     return config;
   }, function (error) {
-    console.log("Error occurred - ",error)
   });
 
 export default interceptor

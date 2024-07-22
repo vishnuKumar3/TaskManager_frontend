@@ -43,9 +43,7 @@ export default function Signup(){
 
     const googleLogin = useGoogleLogin({
         onSuccess: async(codeResponse)=>{
-            console.log("google response...",codeResponse);
             let userData = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${codeResponse.access_token}`);
-            console.log(userData)
             if(userData?.data?.email){
                 let userInfo = {
                     email:userData?.data?.email,
@@ -60,11 +58,10 @@ export default function Signup(){
                 handleGoogleSignup(userInfo, "google")
             }
         },
-        onError: (error) => {console.log('Login Failed:', error);messageApi.open({type:"error",content:error,duration:5})}
+        onError: (error) => {messageApi.open({type:"error",content:error,duration:5})}
     });     
 
     const handleChange = (event)=>{
-        console.log("file info",event.target.files)
         const maxSize = 2 * 1024 * 1024; 
         if (event.target.files && event.target.files[0].size > maxSize) {
             messageApi.open({content:"File size exceeds 2 MB",type:"warning",duration:5});
@@ -122,7 +119,6 @@ export default function Signup(){
         else{
             messageApi.open({content:res?.data?.message,type:"error",duration:5})
         }        
-        console.log("response from signup api",res.data);
     }  
 
     return(
@@ -132,7 +128,6 @@ export default function Signup(){
             initialValues={{ firstName:"",lastName:"",email: '', password: '',reEnteredPassword:"",avatar:"" }}
             validationSchema={LoginSchema}
             onSubmit={(values, { setSubmitting,resetForm }) => {
-                console.log(values,fileObj)
                 handleFormData(values, "normal")
                 resetForm()
                 setFilename("")

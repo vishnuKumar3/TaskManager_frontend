@@ -18,12 +18,10 @@ export default function DNDComponent(props) {
   );
 
   const handleDragStart = (event) => {
-    console.log('Drag started:', event);
     setActiveId(event.active.id);
   };
 
   const handleDragEnd = (event) => {
-    console.log('Drag ended:', event);
     const { active, over } = event;
 
     if (active.id !== over.id) {
@@ -38,11 +36,9 @@ export default function DNDComponent(props) {
   };
 
   const handleDragOver = (event) => {
-    console.log('Drag over:', event);
   };
 
   const handleDragMove = (event) => {
-    console.log('Drag move:', event);
   };
 
   return (

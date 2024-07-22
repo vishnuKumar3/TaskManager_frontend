@@ -56,7 +56,6 @@ const reorder = (list, startIndex, endIndex) => {
  * Moves an item from one list to another list.
  */
 const move = (source, destination, droppableSource, droppableDestination) => {
-  console.log("source",source,"\ndestination",destination,"\ndroppable source",droppableSource,"\ndestination",droppableDestination)
   const sourceClone = Array.from(source);
   const destClone = Array.from(destination);
   const [removed] = sourceClone.splice(droppableSource.index, 1);
@@ -213,7 +212,6 @@ export default function DNDNewComponent(props) {
             allTasks[index] = tasks[taskState]
           }
         })
-        console.log(allTasks)
         setState(allTasks)
         messageApi.open({content:action?.payload?.message,type:"success"})
       }
@@ -251,7 +249,6 @@ export default function DNDNewComponent(props) {
 
   function onDragEnd(result) {
     const { source, destination } = result;
-    console.log(source,destination,result)
     let resultData = {...result}
     // dropped outside the list
     if (!destination) {
@@ -259,7 +256,6 @@ export default function DNDNewComponent(props) {
     }
     const sInd = +source.droppableId;
     const dInd = +destination.droppableId;
-    console.log(sInd,dInd)
     if (sInd === dInd) {
       const items = reorder(state[sInd], source.index, destination.index);
       const newState = [...state];

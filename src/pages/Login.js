@@ -44,9 +44,7 @@ export default function Login(){
 
     const googleLogin = useGoogleLogin({
         onSuccess: async(codeResponse)=>{
-            console.log("google response...",codeResponse);
             let userData = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${codeResponse.access_token}`);
-            console.log(userData)
             if(userData?.data?.email){
                 let userInfo = {
                     email:userData?.data?.email
@@ -54,7 +52,7 @@ export default function Login(){
                 handleSignin(userInfo, "google")
             }
         },
-        onError: (error) => {console.log('Login Failed:', error);messageApi.open({type:"error",content:error,duration:5})}
+        onError: (error) => {messageApi.open({type:"error",content:error,duration:5})}
     });    
 
     const handleSignin = async (formValues, signInType)=>{
@@ -81,7 +79,6 @@ export default function Login(){
         else{
             messageApi.open({content:res?.data?.message,type:"error",duration:5})
         }
-        console.log("response from signup api",res.data);
     }
     
     return(
@@ -91,7 +88,6 @@ export default function Login(){
             initialValues={{ email: '', password: '' }}
             validationSchema={LoginSchema}
             onSubmit={(values, { setSubmitting,resetForm }) => {
-                console.log(values)
                 handleSignin(values,"normal")
                 resetForm()
             }}
