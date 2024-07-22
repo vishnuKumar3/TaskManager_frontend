@@ -162,8 +162,8 @@ export default function TaskComponent(props){
             {deleteConfirmationComponent()}
             {showTask()}
             {contextHolder}            
-            <div style={{display:"flex",alignItems:"center", columnGap:"20px"}}>
-                <div style={{display:"flex",flexDirection:"column",rowGap:"3px"}}>
+            <div style={{display:"flex",alignItems:"center",width:"50%", columnGap:"20px"}}>
+                <div style={{display:"flex",flexDirection:"column",rowGap:"3px",width:"100%"}}>
                     <p style={{fontWeight:"600",fontSize:mobileDevice?"15px":"20px"}}>{props?.title || "Task title"}</p>
                     <p style={{fontSize:mobileDevice?"13px":"initial",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{props?.description || "Task description"}</p>
                     <p style={{fontSize:"12px"}}>{dateObj.toLocaleString()}</p>
