@@ -158,7 +158,7 @@ export default function Signup(){
                 /> 
                 <label htmlFor="file-upload" style={{cursor:"pointer",display:"flex",alignItems:"center",columnGap:"5px"}}>Upload Avatar <CloudUploadIcon/></label>
                 <input type="file" accept='image/*' name="avatar" style={{position:"absolute",zIndex:-1,opacity:0}} onChange={handleChange} id="file-upload"/>
-                {fileName && <p style={{fontSize:"12px",color:"lime"}}>{fileName}</p>}
+                {fileName && <p style={{fontSize:"12px",color:"lime",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{fileName}</p>}
                 {!fileName && <p style={{fontSize:"12px",color:"red"}}>Only image files within 2MB are accepted</p>}
                  <input
                     className={`${styles.input}`}
