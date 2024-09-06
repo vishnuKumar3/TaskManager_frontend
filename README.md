@@ -19,6 +19,8 @@
 <h2>Login page</h2>
 <img src="ReadMeFiles//Screenshot from 2024-07-21 17-06-50.png"/>
 <h2>Tasks (Web View)</h2>
-<img src="ReadMeFiles/Screenshot from 2024-07-21 17-07-05.png"/>
+<img src="ReadMeFiles/Screenshot from 2024-09-06 18-31-34.png"/>
 <h2>Tasks(Mobile View)</h2>
-<img src="ReadMeFiles/Screenshot from 2024-07-21 17-08-24.png"/>
+<img src="ReadMeFiles/Screenshot from 2024-09-06 18-34-08.png"/>
+<h2>Due dates and notifications</h2>
+<img src="ReadMeFiles/Screenshot from 2024-09-06 18-31-34.png"/>

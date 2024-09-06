@@ -1,5 +1,6 @@
 import {IconButton,Button} from "@mui/material"
 import { colors } from "../colour_config"
+import { useEffect } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import Dialog from '@mui/material/Dialog';
@@ -15,6 +16,9 @@ import { updateTaskById } from "../reducers/tasks";
 import { useTheme } from "@mui/material";
 import {useMediaQuery} from "@mui/material"
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import moment from "moment";
+import Badge from '@mui/material/Badge';
+import Chip from '@mui/material/Chip';
 
 const useStyles = makeStyles((theme)=>({
     input:{
@@ -43,6 +47,9 @@ export default function TaskComponent(props){
     const theme = useTheme()
     const mobileDevice = useMediaQuery(theme.breakpoints.down("md"))
     const dateObj = new Date(props?.createdAt);
+    const dueDateObj  =new Date(props?.dueDate || "");
+    const [minDateToStart, setMinDateToStart] = useState("");
+    const [taskDueDate, setTaskDueDate] = useState(props?.dueDate || "");
   
     const handleClose = ()=>{
       setTaskFormOpen(false)
@@ -51,12 +58,82 @@ export default function TaskComponent(props){
     const clearTaskForm = ()=>{
       setTasktitle("");
       setTaskDescription("");
+      setTaskDueDate("");
     }    
+
+
+    const formatAndSetTaskDueDate = (e)=>{
+      let momentObj = moment(e.target.value);
+      setTaskDueDate(momentObj.toDate()) 
+    }    
+
+    const fetchFormattedTaskDate = (date)=>{
+      let momentObj = moment();
+      if(date){
+        momentObj = moment(date);
+      }
+      let formattedDate = momentObj.format("YYYY-MM-DD");
+      return formattedDate;
+      
+    }
+
+    const fetchDueInDaysFormat = (dueDate)=>{
+      let momentObj = moment();
+      if(dueDate){
+        momentObj = moment(dueDate);
+      }
+      let remainingSeconds = momentObj.diff(moment(),"seconds");
+      let remainingDays = 0;
+      if(remainingSeconds>0 && remainingSeconds<=(24*60*60)){
+        remainingDays = 1;
+      }
+      else if(remainingSeconds<=-(24*60*60)){
+        remainingDays=-1;
+      }      
+      else if(remainingSeconds<0){
+        remainingDays=0;
+      }
+      else{
+        remainingDays = Math.ceil(remainingSeconds/(24*60*60))
+      }
+      return remainingDays;
+    }
+
+    const fetchTaskDueMessage = (dueDate)=>{
+      let remainingDays = fetchDueInDaysFormat(dueDate)
+      if(remainingDays>1){
+        return `Due in ${remainingDays} days`;
+      }
+      else if(remainingDays === 1){
+        return "Due Tomorrow";
+      }      
+      else if(remainingDays === 0){
+        return "Due Today"
+      }
+      else{
+        return "Overdue"
+      }
+    }
+
+    const fetchTaskDueColor = (dueDate)=>{
+      let remainingDays = fetchDueInDaysFormat(dueDate);
+      if(remainingDays>1){
+        return "success";
+      }
+      else{
+        return "error";
+      }
+    }
+
+    useEffect(()=>{
+      let today = new Date().toISOString().split('T')[0];
+      setMinDateToStart(today)  
+    },[])
 
 
     const updateTask = ()=>{
         handleClose()
-        dispatch(updateTaskById({taskId:props?.taskId,updateInfo:{title:taskTitle,description:taskDescription}})).then((action)=>{
+        dispatch(updateTaskById({taskId:props?.taskId,updateInfo:{title:taskTitle,description:taskDescription,dueDate:taskDueDate}})).then((action)=>{
           if(action?.error){
             messageApi.open({content:action?.payload?.message,type:"error",duration:5})
           }
@@ -101,6 +178,7 @@ export default function TaskComponent(props){
             <div style={{width:"400px",padding:"10px 0px",display:"flex",flexDirection:"column",rowGap:"15px"}}>
               <input type="text" value={taskTitle} onChange={(e)=>setTasktitle(e.target.value)} placeholder="Task title*" className={styles.input}/>
               <input type="text" value={taskDescription} onChange={(e)=>setTaskDescription(e.target.value)} placeholder="Task description*" className={styles.input}/>
+              <input type="date" value={fetchFormattedTaskDate(taskDueDate)} min={minDateToStart} onChange={(e)=>{formatAndSetTaskDueDate(e)}} className={styles.input}/>
             </div>
           </DialogContent>
           <DialogActions>
@@ -157,23 +235,27 @@ export default function TaskComponent(props){
       }         
     
     return(
-        <div style={{border:"none",borderRadius:"8px",background:"white",width:'100%',padding:"20px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            {dialogComponent()}
-            {deleteConfirmationComponent()}
-            {showTask()}
-            {contextHolder}            
-            <div style={{display:"flex",alignItems:"center",width:"50%", columnGap:"20px"}}>
-                <div style={{display:"flex",flexDirection:"column",rowGap:"3px",width:"100%"}}>
-                    <p style={{fontWeight:"600",fontSize:mobileDevice?"15px":"20px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{props?.title || "Task title"}</p>
-                    <p style={{fontSize:mobileDevice?"13px":"initial",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{props?.description || "Task description"}</p>
-                    <p style={{fontSize:"12px"}}>{dateObj.toLocaleString()}</p>
-                </div>
-            </div>
-            <div style={{display:"flex",alignItems:"center",columnGap:"5px"}}>
-                <IconButton onClick={()=>setDisplayTask(true)}><VisibilityIcon fontSize="small"/></IconButton>                
-                <IconButton onClick={()=>setDeleteConfirmation(true)}><DeleteIcon fontSize="small"/></IconButton>
-                <IconButton onClick={()=>setTaskFormOpen(true)} ><ModeEditIcon fontSize="small"/></IconButton>
-            </div>
-        </div>
+        <Badge style={{width:"100%"}} badgeContent={fetchDueInDaysFormat(props?.dueDate).toString()} color={fetchTaskDueColor(props?.dueDate)}>
+          <div style={{border:"none",borderRadius:"8px",background:"white",width:'100%',padding:"20px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              {dialogComponent()}
+              {deleteConfirmationComponent()}
+              {showTask()}
+              {contextHolder}            
+              <div style={{display:"flex",alignItems:"center",width:"50%", columnGap:"20px"}}>
+                  <div style={{display:"flex",flexDirection:"column",rowGap:"3px",width:"100%"}}>
+                      <p style={{fontWeight:"600",fontSize:mobileDevice?"15px":"20px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{props?.title || "Task title"}</p>
+                      <p title={props?.description || ""} style={{fontSize:mobileDevice?"13px":"initial",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{props?.description || "Task description"}</p>
+                      <p title={dateObj.toLocaleString()} style={{width:"100%",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",fontSize:"12px"}}>Created At: {dateObj.toLocaleString()}</p>
+                      {props?.dueDate && <p title={dueDateObj.toLocaleDateString()} style={{width:"100%",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",fontSize:"12px"}}>Due Date: {dueDateObj.toLocaleDateString()}</p>}
+                      <Chip style={{marginTop:"20px"}} label={fetchTaskDueMessage(props?.dueDate)} size={"small"} color={fetchTaskDueColor(props?.dueDate)}/>
+                  </div>
+              </div>
+              <div style={{display:"flex",alignItems:"center",columnGap:"5px"}}>
+                  <IconButton onClick={()=>setDisplayTask(true)}><VisibilityIcon fontSize="small"/></IconButton>                
+                  <IconButton onClick={()=>setDeleteConfirmation(true)}><DeleteIcon fontSize="small"/></IconButton>
+                  <IconButton onClick={()=>setTaskFormOpen(true)} ><ModeEditIcon fontSize="small"/></IconButton>
+              </div>
+          </div>
+        </Badge>
     )
 }

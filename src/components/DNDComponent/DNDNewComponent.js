@@ -25,7 +25,7 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
-
+import moment from "moment";
 
 
 const data={
@@ -99,6 +99,8 @@ export default function DNDNewComponent(props) {
   const mobileDevice = useMediaQuery(theme.breakpoints.down("md"))
   const [sortItem, setSortItem] = useState("");
   const sortItems = {"date":"createdAtUnixTime","name":"title"};
+  const [taskDueDate, setTaskDueDate] = useState("");
+  const [minDateToStart, setMinDateToStart] = useState("");
 
   const handleSortItemChange = (event) => {
     let value = event?.target?.value;
@@ -156,9 +158,17 @@ export default function DNDNewComponent(props) {
   const clearTaskForm = ()=>{
     setTasktitle("");
     setTaskDescription("");
+    setTaskDueDate("");
+  }
+
+  const formatAndSetTaskDueDate = (e)=>{
+    let momentObj = moment(e.target.value);
+    setTaskDueDate(momentObj.toDate()) 
   }
 
   useEffect(()=>{
+    let today = new Date().toISOString().split('T')[0];
+    setMinDateToStart(today)    
     fetchAllTasks()
   },[])
 
@@ -181,7 +191,7 @@ export default function DNDNewComponent(props) {
 
   const taskCreation = ()=>{
     handleClose()
-    dispatch(createTask({title:taskTitle,description:taskDescription})).then((action)=>{
+    dispatch(createTask({title:taskTitle,description:taskDescription,dueDate:taskDueDate})).then((action)=>{
       clearTaskForm()
       if(action?.error){
         messageApi.open({content:action?.payload?.message,type:"error",duration:5})
@@ -235,6 +245,7 @@ export default function DNDNewComponent(props) {
         <div style={{width:"400px",padding:"10px 0px",display:"flex",flexDirection:"column",rowGap:"15px"}}>
           <input type="text" onChange={(e)=>setTasktitle(e.target.value)} placeholder="Task title*" className={styles.input}/>
           <input type="text" onChange={(e)=>setTaskDescription(e.target.value)} placeholder="Task description*" className={styles.input}/>
+          <input type="date" min={minDateToStart} onChange={(e)=>{formatAndSetTaskDueDate(e)}} className={styles.input}/>
         </div>
       </DialogContent>
       <DialogActions>
@@ -344,7 +355,7 @@ export default function DNDNewComponent(props) {
                               width:"100%"
                             }}
                           >
-                            <TaskComponent fetchAllTasks={fetchAllTasks} createdAt={item?.createdAt} title={item?.title} taskId={item?.taskId} description={item?.description}/>
+                            <TaskComponent fetchAllTasks={fetchAllTasks} createdAt={item?.createdAt} title={item?.title} taskId={item?.taskId} description={item?.description} dueDate={item?.dueDate || ""}/>
                           </div>
                         </div>
                       )}
