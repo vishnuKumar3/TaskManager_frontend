@@ -178,6 +178,7 @@ export default function TaskComponent(props){
             <div style={{width:"400px",padding:"10px 0px",display:"flex",flexDirection:"column",rowGap:"15px"}}>
               <input type="text" value={taskTitle} onChange={(e)=>setTasktitle(e.target.value)} placeholder="Task title*" className={styles.input}/>
               <input type="text" value={taskDescription} onChange={(e)=>setTaskDescription(e.target.value)} placeholder="Task description*" className={styles.input}/>
+              <p>Due Date<sup>*</sup></p>
               <input type="date" value={fetchFormattedTaskDate(taskDueDate)} min={minDateToStart} onChange={(e)=>{formatAndSetTaskDueDate(e)}} className={styles.input}/>
             </div>
           </DialogContent>
